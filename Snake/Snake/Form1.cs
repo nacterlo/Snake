@@ -14,7 +14,6 @@ namespace Snake
         {
             InitializeComponent();
 
-            //Set settings to default
             new Settings();
 
             //Set game speed and start timer
@@ -22,7 +21,7 @@ namespace Snake
             gameTimer.Tick += UpdateScreen;
             gameTimer.Start();
 
-            //Start New game
+       
             StartGame();
         }
 
