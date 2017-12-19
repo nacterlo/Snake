@@ -14,14 +14,15 @@ namespace Snake
         {
             InitializeComponent();
 
+            //Set settings to default
             new Settings();
 
-
+            //Set game speed and start timer
             gameTimer.Interval = 1000 / Settings.Speed;
             gameTimer.Tick += UpdateScreen;
             gameTimer.Start();
 
-
+            //Start New game
             StartGame();
         }
 
@@ -29,12 +30,12 @@ namespace Snake
         {
             lblGameOver.Visible = false;
 
-
+            //Set settings to default
             new Settings();
 
-
+            //Create new player object
             Snake.Clear();
-            Circle head = new Circle {X = 10, Y = 5};
+            Circle head = new Circle { X = 10, Y = 5 };
             Snake.Add(head);
 
 
@@ -43,23 +44,23 @@ namespace Snake
 
         }
 
-
+        //Place random food object
         private void GenerateFood()
         {
             int maxXPos = pbCanvas.Size.Width / Settings.Width;
             int maxYPos = pbCanvas.Size.Height / Settings.Height;
 
             Random random = new Random();
-            food = new Circle {X = random.Next(0, maxXPos), Y = random.Next(0, maxYPos)};
+            food = new Circle { X = random.Next(0, maxXPos), Y = random.Next(0, maxYPos) };
         }
 
 
         private void UpdateScreen(object sender, EventArgs e)
         {
-
+            //Check for Game Over
             if (Settings.GameOver)
             {
-
+                //Check if Enter is pressed
                 if (Input.KeyPressed(Keys.Enter))
                 {
                     StartGame();
@@ -89,25 +90,25 @@ namespace Snake
 
             if (!Settings.GameOver)
             {
+                //Set colour of snake
 
-
-
+                //Draw snake
                 for (int i = 0; i < Snake.Count; i++)
                 {
                     Brush snakeColour;
                     if (i == 0)
-                        snakeColour = Brushes.Black;     
+                        snakeColour = Brushes.Black;     //Draw head
                     else
-                        snakeColour = Brushes.Green;    
+                        snakeColour = Brushes.Green;    //Rest of body
 
-
+                    //Draw snake
                     canvas.FillEllipse(snakeColour,
                         new Rectangle(Snake[i].X * Settings.Width,
                                       Snake[i].Y * Settings.Height,
                                       Settings.Width, Settings.Height));
 
 
-
+                    //Draw Food
                     canvas.FillEllipse(Brushes.Red,
                         new Rectangle(food.X * Settings.Width,
                              food.Y * Settings.Height, Settings.Width, Settings.Height));
@@ -127,7 +128,7 @@ namespace Snake
         {
             for (int i = Snake.Count - 1; i >= 0; i--)
             {
-
+                //Move head
                 if (i == 0)
                 {
                     switch (Settings.direction)
@@ -147,15 +148,38 @@ namespace Snake
                     }
 
 
-
+                    //Get maximum X and Y Pos
                     int maxXPos = pbCanvas.Size.Width / Settings.Width;
                     int maxYPos = pbCanvas.Size.Height / Settings.Height;
 
+                    //Detect collission with game borders.
+                    if (Snake[i].X < 0 || Snake[i].Y < 0
+                        || Snake[i].X >= maxXPos || Snake[i].Y >= maxYPos)
+                    {
+                        Die();
+                    }
+
+
+                    //Detect collission with body
+                    for (int j = 1; j < Snake.Count; j++)
+                    {
+                        if (Snake[i].X == Snake[j].X &&
+                           Snake[i].Y == Snake[j].Y)
+                        {
+                            Die();
+                        }
+                    }
+
+                    //Detect collision with food piece
+                    if (Snake[0].X == food.X && Snake[0].Y == food.Y)
+                    {
+                        Eat();
+                    }
 
                 }
                 else
                 {
-
+                    //Move body
                     Snake[i].X = Snake[i - 1].X;
                     Snake[i].Y = Snake[i - 1].Y;
                 }
@@ -174,7 +198,7 @@ namespace Snake
 
         private void Eat()
         {
-
+            //Add circle to body
             Circle circle = new Circle
             {
                 X = Snake[Snake.Count - 1].X,
@@ -182,13 +206,16 @@ namespace Snake
             };
             Snake.Add(circle);
 
-
+            //Update Score
             Settings.Score += Settings.Points;
             lblScore.Text = Settings.Score.ToString();
 
             GenerateFood();
         }
 
-
+        private void Die()
+        {
+            Settings.GameOver = true;
+        }
     }
 }
